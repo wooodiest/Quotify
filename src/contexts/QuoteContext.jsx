@@ -53,8 +53,44 @@ export const QuoteProvider = ({ children }) => {
 
     loadFavorites();
   }, []);
+  
+  // Load saved random quote
+  useEffect(() => {
+    const loadRandomQuote = async () => {
+      try {
+        // Check if we already have a random quote stored
+        let storedRandomQuote = null;
+        
+        // Try to get from electronAPI if available
+        if (window.electronAPI && window.electronAPI.store) {
+          storedRandomQuote = await window.electronAPI.store.get('randomQuote');
+        } else {
+          // Fallback to localStorage
+          const storedData = localStorage.getItem('randomQuote');
+          if (storedData) {
+            try {
+              storedRandomQuote = JSON.parse(storedData);
+            } catch (parseErr) {
+              console.error('Error parsing random quote from localStorage:', parseErr);
+            }
+          }
+        }
+        
+        if (storedRandomQuote) {
+          setRandomQuote(storedRandomQuote);
+        } else {
+          // If no stored random quote, fetch a new one
+          await fetchRandomQuote();
+        }
+      } catch (err) {
+        console.error('Error loading random quote:', err);
+      }
+    };
 
-  // Load quote of the day
+    loadRandomQuote();
+  }, []);
+
+  // Load quote of the day and random quote
   useEffect(() => {
     const loadQuoteOfDay = async () => {
       try {
@@ -168,6 +204,14 @@ export const QuoteProvider = ({ children }) => {
         // Store in IndexedDB
         await db.quotes.put(quote);
         
+        // Store in electronAPI or localStorage
+        if (window.electronAPI && window.electronAPI.store) {
+          await window.electronAPI.store.set('randomQuote', quote);
+        } else {
+          // Fallback to localStorage
+          localStorage.setItem('randomQuote', JSON.stringify(quote));
+        }
+        
         setRandomQuote(quote);
         isFetchingRandomQuote = false; // Reset flag
         return quote;
@@ -176,9 +220,19 @@ export const QuoteProvider = ({ children }) => {
         const cachedQuotes = await db.quotes.toArray();
         if (cachedQuotes.length > 0) {
           const randomIndex = Math.floor(Math.random() * cachedQuotes.length);
-          setRandomQuote(cachedQuotes[randomIndex]);
+          const quote = cachedQuotes[randomIndex];
+          
+          // Store in electronAPI or localStorage
+          if (window.electronAPI && window.electronAPI.store) {
+            await window.electronAPI.store.set('randomQuote', quote);
+          } else {
+            // Fallback to localStorage
+            localStorage.setItem('randomQuote', JSON.stringify(quote));
+          }
+          
+          setRandomQuote(quote);
           isFetchingRandomQuote = false; // Reset flag
-          return cachedQuotes[randomIndex];
+          return quote;
         } else {
           isFetchingRandomQuote = false; // Reset flag even on error
           throw new Error('No cached quotes available');

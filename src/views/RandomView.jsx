@@ -6,12 +6,7 @@ import { useQuotes } from '../contexts/QuoteContext';
 const RandomView = () => {
   const { randomQuote, loading, error, fetchRandomQuote } = useQuotes();
 
-  useEffect(() => {
-    // Fetch a random quote only once when component mounts
-    console.log('RandomView useEffect - fetching random quote');
-    fetchRandomQuote();
-    // Empty dependency array ensures this runs only once
-  }, []);
+  // Usuwamy useEffect, który wywoływał fetchRandomQuote, ponieważ teraz QuoteContext zajmuje się ładowaniem zapisanego cytatu
   
   // Add a debug log to track component renders
   console.log('RandomView rendering, randomQuote:', randomQuote ? randomQuote.id : 'none');
