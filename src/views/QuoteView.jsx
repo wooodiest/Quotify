@@ -1,16 +1,12 @@
-import React, { useEffect } from 'react';
+import React from 'react';
 import Navigation from '../components/Navigation';
 import QuoteCard from '../components/QuoteCard';
+import LoadingSpinner from '../components/LoadingSpinner';
+import ErrorMessage from '../components/ErrorMessage';
 import { useQuotes } from '../contexts/QuoteContext';
 
 const QuoteView = () => {
   const { quoteOfDay, loading, error, fetchQuoteOfDay } = useQuotes();
-
-  useEffect(() => {
-    if (!quoteOfDay) {
-      fetchQuoteOfDay();
-    }
-  }, [quoteOfDay, fetchQuoteOfDay]);
 
   return (
     <div className="min-h-screen flex flex-col bg-gray-100">
@@ -20,15 +16,13 @@ const QuoteView = () => {
         <h1 className="text-3xl font-bold mb-8 text-center">Quote of the Day</h1>
         
         {error && (
-          <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">
-            {error}
-          </div>
+          <ErrorMessage message={error} onRetry={fetchQuoteOfDay} />
         )}
         
         <div className="max-w-2xl mx-auto">
           {loading ? (
-            <div className="animate-pulse">
-              <div className="h-32 bg-gray-200 rounded-lg mb-4"></div>
+            <div className="h-32 flex items-center justify-center">
+              <LoadingSpinner size="large" />
             </div>
           ) : (
             <QuoteCard quote={quoteOfDay} />
