@@ -59,7 +59,23 @@ export const QuoteProvider = ({ children }) => {
     const loadQuoteOfDay = async () => {
       try {
         // Check if we already have a quote of the day stored and it's from today
-        const storedQuoteOfDay = await window.electronAPI.store.get('quoteOfDay');
+        let storedQuoteOfDay = null;
+        
+        // Try to get from electronAPI if available
+        if (window.electronAPI && window.electronAPI.store) {
+          storedQuoteOfDay = await window.electronAPI.store.get('quoteOfDay');
+        } else {
+          // Fallback to localStorage
+          const storedData = localStorage.getItem('quoteOfDay');
+          if (storedData) {
+            try {
+              storedQuoteOfDay = JSON.parse(storedData);
+            } catch (parseErr) {
+              console.error('Error parsing quote of day from localStorage:', parseErr);
+            }
+          }
+        }
+        
         const today = new Date().toDateString();
         
         if (storedQuoteOfDay && storedQuoteOfDay.date === today) {
@@ -98,10 +114,18 @@ export const QuoteProvider = ({ children }) => {
       await db.quotes.put(quote);
       
       // Store as quote of the day with date
-      await window.electronAPI.store.set('quoteOfDay', {
+      const quoteData = {
         quote,
         date: new Date().toDateString()
-      });
+      };
+      
+      // Try to store in electronAPI if available
+      if (window.electronAPI && window.electronAPI.store) {
+        await window.electronAPI.store.set('quoteOfDay', quoteData);
+      } else {
+        // Fallback to localStorage
+        localStorage.setItem('quoteOfDay', JSON.stringify(quoteData));
+      }
       
       setQuoteOfDay(quote);
       return quote;
@@ -120,7 +144,19 @@ export const QuoteProvider = ({ children }) => {
     }
   };
 
+  // Dodajemy zmienną, która zapobiega wielokrotnemu wywoływaniu fetchRandomQuote
+  let isFetchingRandomQuote = false;
+  
   const fetchRandomQuote = async () => {
+    console.log('QuoteContext - fetchRandomQuote called');
+    
+    // Jeśli już pobieramy cytat, nie rób tego ponownie
+    if (isFetchingRandomQuote) {
+      console.log('Already fetching random quote, skipping duplicate call');
+      return;
+    }
+    
+    isFetchingRandomQuote = true;
     setLoading(true);
     setError(null);
     
@@ -133,6 +169,7 @@ export const QuoteProvider = ({ children }) => {
         await db.quotes.put(quote);
         
         setRandomQuote(quote);
+        isFetchingRandomQuote = false; // Reset flag
         return quote;
       } else {
         // If offline, use a random quote from the cache
@@ -140,15 +177,17 @@ export const QuoteProvider = ({ children }) => {
         if (cachedQuotes.length > 0) {
           const randomIndex = Math.floor(Math.random() * cachedQuotes.length);
           setRandomQuote(cachedQuotes[randomIndex]);
+          isFetchingRandomQuote = false; // Reset flag
           return cachedQuotes[randomIndex];
         } else {
+          isFetchingRandomQuote = false; // Reset flag even on error
           throw new Error('No cached quotes available');
         }
       }
     } catch (err) {
       setError('Failed to fetch random quote');
       console.error('Error fetching random quote:', err);
-      throw err;
+      isFetchingRandomQuote = false; // Reset flag on error
     } finally {
       setLoading(false);
     }

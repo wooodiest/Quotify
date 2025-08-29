@@ -7,10 +7,14 @@ const RandomView = () => {
   const { randomQuote, loading, error, fetchRandomQuote } = useQuotes();
 
   useEffect(() => {
-    if (!randomQuote) {
-      fetchRandomQuote();
-    }
-  }, [randomQuote, fetchRandomQuote]);
+    // Fetch a random quote only once when component mounts
+    console.log('RandomView useEffect - fetching random quote');
+    fetchRandomQuote();
+    // Empty dependency array ensures this runs only once
+  }, []);
+  
+  // Add a debug log to track component renders
+  console.log('RandomView rendering, randomQuote:', randomQuote ? randomQuote.id : 'none');
 
   return (
     <div className="min-h-screen flex flex-col bg-gray-100">

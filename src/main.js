@@ -23,12 +23,14 @@ ipcMain.on('electron-store-set', (event, key, val) => {
 const createWindow = () => {
   // Create the browser window.
   const mainWindow = new BrowserWindow({
-    width: 800,
-    height: 600,
+    width: 1600,
+    height: 900,
     webPreferences: {
       preload: path.join(__dirname, 'preload.js'),
       contextIsolation: true,
       nodeIntegration: false,
+      autoHideMenuBar: true,
+      center: true,
     },
   });
 
