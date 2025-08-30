@@ -1,8 +1,19 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { useQuotes } from '../contexts/QuoteContext';
 
 const QuoteCard = ({ quote, showActions = true }) => {
   const { addToFavorites, removeFromFavorites, isFavorite } = useQuotes();
+  const [isFav, setIsFav] = useState(false);
+
+  useEffect(() => {
+    if (quote) {
+      const checkFavorite = async () => {
+        const result = await isFavorite(quote.id);
+        setIsFav(result);
+      };
+      checkFavorite();
+    }
+  }, [quote, isFavorite]);
 
   if (!quote) {
     return (
@@ -13,11 +24,13 @@ const QuoteCard = ({ quote, showActions = true }) => {
     );
   }
 
-  const handleFavoriteToggle = () => {
-    if (isFavorite(quote.id)) {
-      removeFromFavorites(quote.id);
+  const handleFavoriteToggle = async () => {
+    if (isFav) {
+      await removeFromFavorites(quote.id);
+      setIsFav(false);
     } else {
-      addToFavorites(quote);
+      await addToFavorites(quote);
+      setIsFav(true);
     }
   };
 
@@ -30,7 +43,7 @@ const QuoteCard = ({ quote, showActions = true }) => {
         <div className="mt-4 flex justify-end">
           <button
             onClick={handleFavoriteToggle}
-            className={`flex items-center px-4 py-2 rounded-md ${isFavorite(quote.id) 
+            className={`flex items-center px-4 py-2 rounded-md ${isFav 
               ? 'bg-red-100 text-red-600 hover:bg-red-200' 
               : 'bg-gray-100 hover:bg-gray-200'}`}
           >
@@ -38,9 +51,9 @@ const QuoteCard = ({ quote, showActions = true }) => {
               xmlns="http://www.w3.org/2000/svg" 
               className="h-5 w-5 mr-1" 
               viewBox="0 0 20 20" 
-              fill={isFavorite(quote.id) ? 'currentColor' : 'none'}
+              fill={isFav ? 'currentColor' : 'none'}
               stroke="currentColor"
-              strokeWidth={isFavorite(quote.id) ? '0' : '1.5'}
+              strokeWidth={isFav ? '0' : '1.5'}
             >
               <path 
                 fillRule="evenodd" 
@@ -48,7 +61,7 @@ const QuoteCard = ({ quote, showActions = true }) => {
                 clipRule="evenodd" 
               />
             </svg>
-            {isFavorite(quote.id) ? 'Remove from Favorites' : 'Add to Favorites'}
+            {isFav ? 'Remove from Favorites' : 'Add to Favorites'}
           </button>
         </div>
       )}

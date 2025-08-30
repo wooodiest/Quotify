@@ -1,6 +1,3 @@
-/**
- * Hook do zarządzania stanem online/offline
- */
 import { useState, useEffect } from 'react';
 
 export const useOnlineStatus = () => {

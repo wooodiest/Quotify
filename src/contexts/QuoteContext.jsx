@@ -114,8 +114,13 @@ export const QuoteProvider = ({ children }) => {
     }
   };
 
-  const isFavorite = (quoteId) => {
-    return favorites.some(quote => quote.id === quoteId);
+  const isFavorite = async (quoteId) => {
+    try {
+      return await QuoteService.isFavorite(quoteId);
+    } catch (err) {
+      console.error('Error checking if quote is favorite:', err);
+      return favorites.some(quote => quote.id === quoteId);
+    }
   };
 
   const value = {

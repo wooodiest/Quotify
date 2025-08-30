@@ -20,6 +20,10 @@ ipcMain.on('electron-store-set', (event, key, val) => {
   store.set(key, val);
 });
 
+ipcMain.on('electron-store-delete', (event, key) => {
+  store.delete(key);
+});
+
 const createWindow = () => {
   // Create the browser window.
   const mainWindow = new BrowserWindow({
