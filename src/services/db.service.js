@@ -2,71 +2,73 @@ import Dexie from 'dexie';
 
 const db = new Dexie('QuotifyDB');
 db.version(1).stores({
-  quotes: '++id,text,author,tags',
-  favorites: '++id,quoteId'
+  quotes: '++id,text,author,tags,userId',
+  favorites: '++id,quoteId,userId'
 });
 
 export const DbService = {
 
-  saveQuote: async (quote) => {
+  saveQuote: async (userId, quote) => {
     try {
-      return await db.quotes.put(quote);
+      return await db.quotes.put({ ...quote, userId });
     } catch (error) {
       console.error('Error saving quote to database:', error);
       throw error;
     }
   },
   
-  saveMultipleQuotes: async (quotes) => {
+  saveMultipleQuotes: async (userId, quotes) => {
     try {
-      return await db.quotes.bulkPut(quotes);
+      const quotesWithUser = quotes.map(q => ({ ...q, userId }));
+      return await db.quotes.bulkPut(quotesWithUser);
     } catch (error) {
       console.error('Error saving multiple quotes to database:', error);
       throw error;
     }
   },
 
-  getQuoteById: async (id) => {
+  getQuoteById: async (userId, id) => {
     try {
-      return await db.quotes.get(id);
+      return await db.quotes.get({ id, userId });
     } catch (error) {
       console.error(`Error getting quote with id ${id} from database:`, error);
       throw error;
     }
   },
-  getAllQuotes: async () => {
+
+  getAllQuotes: async (userId) => {
     try {
-      return await db.quotes.toArray();
+      return await db.quotes.where('userId').equals(userId).toArray();
     } catch (error) {
       console.error('Error getting all quotes from database:', error);
       throw error;
     }
   },
 
-  addToFavorites: async (quoteId) => {
+  addToFavorites: async (userId, quoteId) => {
     try {
-      return await db.favorites.put({ quoteId });
+      return await db.favorites.put({ quoteId, userId });
     } catch (error) {
       console.error(`Error adding quote ${quoteId} to favorites:`, error);
       throw error;
     }
   },
 
-  removeFromFavorites: async (quoteId) => {
+  removeFromFavorites: async (userId, quoteId) => {
     try {
-      await db.favorites.where({ quoteId }).delete();
+      await db.favorites.where({ quoteId, userId }).delete();
     } catch (error) {
       console.error(`Error removing quote ${quoteId} from favorites:`, error);
       throw error;
     }
   },
 
-  getFavorites: async () => {
+  getFavorites: async (userId) => {
     try {
-      const storedFavorites = await db.favorites.toArray();
+      const storedFavorites = await db.favorites.where('userId').equals(userId).toArray();
       const favoriteQuotes = await Promise.all(
         storedFavorites.map(async (fav) => {
-          return await db.quotes.get(fav.quoteId);
+          return await db.quotes.get({ id: fav.quoteId, userId });
         })
       );
       return favoriteQuotes.filter(Boolean);
@@ -76,9 +78,9 @@ export const DbService = {
     }
   },
 
-  isFavorite: async (quoteId) => {
+  isFavorite: async (userId, quoteId) => {
     try {
-      const count = await db.favorites.where({ quoteId }).count();
+      const count = await db.favorites.where({ quoteId, userId }).count();
       return count > 0;
     } catch (error) {
       console.error(`Error checking if quote ${quoteId} is favorite:`, error);
@@ -86,9 +88,9 @@ export const DbService = {
     }
   },
 
-  getRandomQuote: async () => {
+  getRandomQuote: async (userId) => {
     try {
-      const quotes = await db.quotes.toArray();
+      const quotes = await db.quotes.where('userId').equals(userId).toArray();
       if (quotes.length === 0) return null;
       
       const randomIndex = Math.floor(Math.random() * quotes.length);
@@ -99,9 +101,9 @@ export const DbService = {
     }
   },
   
-  getQuotesCount: async () => {
+  getQuotesCount: async (userId) => {
     try {
-      return await db.quotes.count();
+      return await db.quotes.where('userId').equals(userId).count();
     } catch (error) {
       console.error('Error getting quotes count from database:', error);
       throw error;

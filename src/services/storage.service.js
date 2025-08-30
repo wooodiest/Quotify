@@ -1,11 +1,20 @@
 export const StorageService = {
 
-  setItem: async (key, data) => {
+  _getNamespacedKey: (key, userId) => {
+    if (!userId) {
+      throw new Error("UserId is required for storage operation.");
+    }
+    return `${userId}:${key}`;
+  },
+
+  setItem: async (key, data, userId) => {
     try {
-      if (window.electronAPI && window.electronAPI.store) {
-        await window.electronAPI.store.set(key, data);
+      const namespacedKey = StorageService._getNamespacedKey(key, userId);
+
+      if (window.electronAPI?.store) {
+        await window.electronAPI.store.set(namespacedKey, data);
       } else {
-        localStorage.setItem(key, JSON.stringify(data));
+        localStorage.setItem(namespacedKey, JSON.stringify(data));
       }
     } catch (error) {
       console.error(`Error storing data for key ${key}:`, error);
@@ -13,12 +22,14 @@ export const StorageService = {
     }
   },
 
-  getItem: async (key) => {
+  getItem: async (key, userId) => {
     try {
-      if (window.electronAPI && window.electronAPI.store) {
-        return await window.electronAPI.store.get(key);
+      const namespacedKey = StorageService._getNamespacedKey(key, userId);
+
+      if (window.electronAPI?.store) {
+        return await window.electronAPI.store.get(namespacedKey);
       } else {
-        const data = localStorage.getItem(key);
+        const data = localStorage.getItem(namespacedKey);
         return data ? JSON.parse(data) : null;
       }
     } catch (error) {
@@ -27,12 +38,14 @@ export const StorageService = {
     }
   },
 
-  removeItem: async (key) => {
+  removeItem: async (key, userId) => {
     try {
-      if (window.electronAPI && window.electronAPI.store) {
-        await window.electronAPI.store.delete(key);
+      const namespacedKey = StorageService._getNamespacedKey(key, userId);
+
+      if (window.electronAPI?.store) {
+        await window.electronAPI.store.delete(namespacedKey);
       } else {
-        localStorage.removeItem(key);
+        localStorage.removeItem(namespacedKey);
       }
     } catch (error) {
       console.error(`Error removing data for key ${key}:`, error);

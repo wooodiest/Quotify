@@ -1,32 +1,20 @@
-/**
- * This file will automatically be loaded by vite and run in the "renderer" context.
- * To learn more about the differences between the "main" and the "renderer" context in
- * Electron, visit:
- *
- * https://electronjs.org/docs/tutorial/process-model
- */
-
 import React from 'react';
 import ReactDOM from 'react-dom/client';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import './index.css';
 import { useAuth } from './contexts/AuthContext';
 
-// Import contexts
 import { AuthProvider } from './contexts/AuthContext';
 import { QuoteProvider } from './contexts/QuoteContext';
 
-// Import views
 import LoginView from './views/LoginView';
 import QuoteView from './views/QuoteView';
 import RandomView from './views/RandomView';
 import FavoritesView from './views/FavoritesView';
 
-// Import components
 import ErrorBoundary from './components/ErrorBoundary';
 import LoadingSpinner from './components/LoadingSpinner';
 
-// Protected Route component
 const ProtectedRoute = ({ children }) => {
   const { user, loading } = useAuth();
   

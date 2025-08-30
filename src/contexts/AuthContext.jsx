@@ -14,7 +14,7 @@ export const AuthProvider = ({ children }) => {
   useEffect(() => {
     const checkAuth = async () => {
       try {
-        const authData = await StorageService.getItem('auth');
+        const authData = await StorageService.getItem('auth', 'lastUserId');
         if (authData) {
           setUser(authData);
         }
@@ -39,7 +39,7 @@ export const AuthProvider = ({ children }) => {
       });
 
       const userData = response.data;
-      await StorageService.setItem('auth', userData);
+      await StorageService.setItem('auth', userData, 'lastUserId');
       
       setUser(userData);
       return userData;
@@ -53,7 +53,7 @@ export const AuthProvider = ({ children }) => {
 
   const logout = async () => {
     try {
-      await StorageService.removeItem('auth');
+      await StorageService.removeItem('auth', 'lastUserId');
       setUser(null);
     } catch (err) {
       console.error('Error during logout:', err);
