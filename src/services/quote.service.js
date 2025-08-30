@@ -7,47 +7,33 @@ import { DbService } from './db.service';
 import { StorageService } from './storage.service';
 
 export const QuoteService = {
-  /**
-   * Pobiera cytat dnia
-   * @returns {Promise<Object>} Obiekt cytatu dnia
-   */
+
   getQuoteOfDay: async () => {
     try {
-      // Sprawdź, czy mamy zapisany cytat dnia
       const storedQuoteOfDay = await StorageService.getItem('quoteOfDay');
       const today = new Date().toDateString();
       
-      // Jeśli mamy zapisany cytat dnia i jest aktualny, zwróć go
       if (storedQuoteOfDay && storedQuoteOfDay.date === today) {
         return storedQuoteOfDay.quote;
       }
       
-      // Jeśli jesteśmy online, pobierz nowy cytat dnia
       if (navigator.onLine) {
         const quote = await ApiService.getQuoteOfDay(new Date());
-        
-        // Zapisz cytat w bazie danych
         await DbService.saveQuote(quote);
-        
-        // Zapisz jako cytat dnia z datą
         const quoteData = {
           quote,
           date: today
         };
-        await StorageService.setItem('quoteOfDay', quoteData);
-        
+        await StorageService.setItem('quoteOfDay', quoteData);      
         return quote;
       } else {
-        // Jeśli jesteśmy offline, użyj losowego cytatu z bazy danych
         const randomQuote = await DbService.getRandomQuote();
         if (randomQuote) {
-          // Zapisz jako cytat dnia z datą
           const quoteData = {
             quote: randomQuote,
             date: today
           };
-          await StorageService.setItem('quoteOfDay', quoteData);
-          
+          await StorageService.setItem('quoteOfDay', quoteData);     
           return randomQuote;
         }
         throw new Error('No cached quotes available');
@@ -58,38 +44,22 @@ export const QuoteService = {
     }
   },
   
-  /**
-   * Pobiera losowy cytat
-   * @returns {Promise<Object>} Obiekt losowego cytatu
-   */
   getRandomQuote: async () => {
     try {
-      // Sprawdź, czy mamy zapisany losowy cytat
       const storedRandomQuote = await StorageService.getItem('randomQuote');
-      
-      // Jeśli mamy zapisany losowy cytat, zwróć go
       if (storedRandomQuote) {
         return storedRandomQuote;
       }
       
-      // Jeśli jesteśmy online, pobierz nowy losowy cytat
       if (navigator.onLine) {
-        const quote = await ApiService.getRandomQuote();
-        
-        // Zapisz cytat w bazie danych
+        const quote = await ApiService.getRandomQuote();   
         await DbService.saveQuote(quote);
-        
-        // Zapisz jako losowy cytat
-        await StorageService.setItem('randomQuote', quote);
-        
+        await StorageService.setItem('randomQuote', quote);    
         return quote;
       } else {
-        // Jeśli jesteśmy offline, użyj losowego cytatu z bazy danych
         const randomQuote = await DbService.getRandomQuote();
         if (randomQuote) {
-          // Zapisz jako losowy cytat
-          await StorageService.setItem('randomQuote', randomQuote);
-          
+          await StorageService.setItem('randomQuote', randomQuote);      
           return randomQuote;
         }
         throw new Error('No cached quotes available');
@@ -100,30 +70,17 @@ export const QuoteService = {
     }
   },
   
-  /**
-   * Odświeża losowy cytat
-   * @returns {Promise<Object>} Obiekt nowego losowego cytatu
-   */
   refreshRandomQuote: async () => {
     try {
-      // Jeśli jesteśmy online, pobierz nowy losowy cytat
       if (navigator.onLine) {
         const quote = await ApiService.getRandomQuote();
-        
-        // Zapisz cytat w bazie danych
         await DbService.saveQuote(quote);
-        
-        // Zapisz jako losowy cytat
-        await StorageService.setItem('randomQuote', quote);
-        
+        await StorageService.setItem('randomQuote', quote);  
         return quote;
       } else {
-        // Jeśli jesteśmy offline, użyj losowego cytatu z bazy danych
         const randomQuote = await DbService.getRandomQuote();
         if (randomQuote) {
-          // Zapisz jako losowy cytat
-          await StorageService.setItem('randomQuote', randomQuote);
-          
+          await StorageService.setItem('randomQuote', randomQuote);       
           return randomQuote;
         }
         throw new Error('No cached quotes available');
@@ -134,17 +91,9 @@ export const QuoteService = {
     }
   },
   
-  /**
-   * Dodaje cytat do ulubionych
-   * @param {Object} quote - Obiekt cytatu do dodania do ulubionych
-   * @returns {Promise<void>}
-   */
   addToFavorites: async (quote) => {
     try {
-      // Zapisz cytat w bazie danych, jeśli jeszcze nie istnieje
-      await DbService.saveQuote(quote);
-      
-      // Dodaj do ulubionych
+      await DbService.saveQuote(quote);     
       await DbService.addToFavorites(quote.id);
     } catch (error) {
       console.error('Error adding quote to favorites:', error);
@@ -152,11 +101,6 @@ export const QuoteService = {
     }
   },
   
-  /**
-   * Usuwa cytat z ulubionych
-   * @param {number} quoteId - ID cytatu do usunięcia z ulubionych
-   * @returns {Promise<void>}
-   */
   removeFromFavorites: async (quoteId) => {
     try {
       await DbService.removeFromFavorites(quoteId);
@@ -166,10 +110,6 @@ export const QuoteService = {
     }
   },
   
-  /**
-   * Pobiera wszystkie ulubione cytaty
-   * @returns {Promise<Array>} Tablica ulubionych cytatów
-   */
   getFavorites: async () => {
     try {
       return await DbService.getFavorites();
@@ -179,17 +119,57 @@ export const QuoteService = {
     }
   },
   
-  /**
-   * Sprawdza, czy cytat jest w ulubionych
-   * @param {number} quoteId - ID cytatu do sprawdzenia
-   * @returns {Promise<boolean>} True jeśli cytat jest w ulubionych, false w przeciwnym razie
-   */
   isFavorite: async (quoteId) => {
     try {
       return await DbService.isFavorite(quoteId);
     } catch (error) {
       console.error('Error checking if quote is favorite:', error);
       return false;
+    }
+  },
+  
+  getAndCacheMultipleQuotes: async (limit = 30, forceRefresh = false) => {
+    try {
+      const quotesCount = await DbService.getQuotesCount();
+      if (!forceRefresh && quotesCount >= limit) {
+        return await DbService.getAllQuotes();
+      }
+      
+      if (navigator.onLine) {
+        const quotes = await ApiService.getMultipleQuotes(limit);
+        await DbService.saveMultipleQuotes(quotes);
+        
+        await StorageService.setItem('lastQuotesCacheUpdate', {
+          timestamp: Date.now(),
+          count: quotes.length
+        });
+        
+        return quotes;
+      } else {
+        const cachedQuotes = await DbService.getAllQuotes();    
+        if (cachedQuotes.length > 0) {
+          return cachedQuotes;
+        }
+        
+        throw new Error('No cached quotes available and device is offline');
+      }
+    } catch (error) {
+      console.error('Error getting and caching multiple quotes:', error);
+      throw error;
+    }
+  },
+  
+  shouldRefreshQuotesCache: async (cacheMaxAge = 24 * 60 * 60 * 1000) => {
+    try {
+      const lastUpdate = await StorageService.getItem('lastQuotesCacheUpdate');
+      if (!lastUpdate) return true;
+      
+      const now = Date.now();
+      const timeSinceLastUpdate = now - lastUpdate.timestamp; 
+      return timeSinceLastUpdate > cacheMaxAge;
+    } catch (error) {
+      console.error('Error checking if quotes cache should be refreshed:', error);
+      return true;
     }
   }
 };

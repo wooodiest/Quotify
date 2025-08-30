@@ -1,10 +1,5 @@
-/**
- * Database Service - odpowiedzialny za operacje na bazie danych IndexedDB
- * Wykorzystuje bibliotekę Dexie
- */
 import Dexie from 'dexie';
 
-// Inicjalizacja bazy danych
 const db = new Dexie('QuotifyDB');
 db.version(1).stores({
   quotes: '++id,text,author,tags',
@@ -12,11 +7,7 @@ db.version(1).stores({
 });
 
 export const DbService = {
-  /**
-   * Zapisuje cytat do bazy danych
-   * @param {Object} quote - Obiekt cytatu do zapisania
-   * @returns {Promise<number>} ID zapisanego cytatu
-   */
+
   saveQuote: async (quote) => {
     try {
       return await db.quotes.put(quote);
@@ -25,12 +16,16 @@ export const DbService = {
       throw error;
     }
   },
+  
+  saveMultipleQuotes: async (quotes) => {
+    try {
+      return await db.quotes.bulkPut(quotes);
+    } catch (error) {
+      console.error('Error saving multiple quotes to database:', error);
+      throw error;
+    }
+  },
 
-  /**
-   * Pobiera cytat z bazy danych po ID
-   * @param {number} id - ID cytatu do pobrania
-   * @returns {Promise<Object>} Obiekt cytatu lub undefined jeśli nie znaleziono
-   */
   getQuoteById: async (id) => {
     try {
       return await db.quotes.get(id);
@@ -39,11 +34,6 @@ export const DbService = {
       throw error;
     }
   },
-
-  /**
-   * Pobiera wszystkie cytaty z bazy danych
-   * @returns {Promise<Array>} Tablica cytatów
-   */
   getAllQuotes: async () => {
     try {
       return await db.quotes.toArray();
@@ -53,11 +43,6 @@ export const DbService = {
     }
   },
 
-  /**
-   * Dodaje cytat do ulubionych
-   * @param {number} quoteId - ID cytatu do dodania do ulubionych
-   * @returns {Promise<number>} ID zapisanego wpisu ulubionych
-   */
   addToFavorites: async (quoteId) => {
     try {
       return await db.favorites.put({ quoteId });
@@ -67,11 +52,6 @@ export const DbService = {
     }
   },
 
-  /**
-   * Usuwa cytat z ulubionych
-   * @param {number} quoteId - ID cytatu do usunięcia z ulubionych
-   * @returns {Promise<void>}
-   */
   removeFromFavorites: async (quoteId) => {
     try {
       await db.favorites.where({ quoteId }).delete();
@@ -81,10 +61,6 @@ export const DbService = {
     }
   },
 
-  /**
-   * Pobiera wszystkie ulubione cytaty
-   * @returns {Promise<Array>} Tablica ulubionych cytatów
-   */
   getFavorites: async () => {
     try {
       const storedFavorites = await db.favorites.toArray();
@@ -100,11 +76,6 @@ export const DbService = {
     }
   },
 
-  /**
-   * Sprawdza, czy cytat jest w ulubionych
-   * @param {number} quoteId - ID cytatu do sprawdzenia
-   * @returns {Promise<boolean>} True jeśli cytat jest w ulubionych, false w przeciwnym razie
-   */
   isFavorite: async (quoteId) => {
     try {
       const count = await db.favorites.where({ quoteId }).count();
@@ -115,10 +86,6 @@ export const DbService = {
     }
   },
 
-  /**
-   * Pobiera losowy cytat z bazy danych
-   * @returns {Promise<Object>} Losowy cytat lub null jeśli baza jest pusta
-   */
   getRandomQuote: async () => {
     try {
       const quotes = await db.quotes.toArray();
@@ -130,8 +97,16 @@ export const DbService = {
       console.error('Error getting random quote from database:', error);
       throw error;
     }
+  },
+  
+  getQuotesCount: async () => {
+    try {
+      return await db.quotes.count();
+    } catch (error) {
+      console.error('Error getting quotes count from database:', error);
+      throw error;
+    }
   }
 };
 
-// Eksportujemy instancję bazy danych dla zaawansowanych przypadków użycia
 export { db };
