@@ -3,14 +3,13 @@ import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 
 const LoginView = () => {
-  const [username, setUsername] = useState('');
-  const [password, setPassword] = useState('');
+  const [username, setUsername] = useState("alexanderj");
+  const [password, setPassword] = useState("alexanderjpass");
   const [error, setError] = useState('');
   const { login, user, loading, error: authError } = useAuth();
   const navigate = useNavigate();
 
   useEffect(() => {
-    // If user is already logged in, redirect to home
     if (user) {
       navigate('/');
     }
@@ -89,8 +88,8 @@ const LoginView = () => {
         <div className="mt-6 text-center text-sm">
           <p className="text-gray-600">
             Demo credentials: <br />
-            Username: <span className="font-semibold">kminchelle</span> <br />
-            Password: <span className="font-semibold">0lelplR</span>
+            Username: <span className="font-semibold">alexanderj</span> <br />
+            Password: <span className="font-semibold">alexanderjpass</span>
           </p>
         </div>
       </div>

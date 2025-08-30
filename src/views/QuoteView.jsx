@@ -28,16 +28,6 @@ const QuoteView = () => {
             <QuoteCard quote={quoteOfDay} />
           )}
         </div>
-        
-        <div className="mt-8 text-center">
-          <button
-            onClick={fetchQuoteOfDay}
-            disabled={loading}
-            className={`bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline ${loading ? 'opacity-50 cursor-not-allowed' : ''}`}
-          >
-            {loading ? 'Loading...' : 'Refresh Quote'}
-          </button>
-        </div>
       </div>
       
       <footer className="bg-gray-800 text-white p-4 text-center">
