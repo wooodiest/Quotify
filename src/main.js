@@ -26,10 +26,11 @@ const createWindow = () => {
       preload: path.join(__dirname, 'preload.js'),
       contextIsolation: true,
       nodeIntegration: false,
-      autoHideMenuBar: true,
       center: true,
     },
   });
+
+  mainWindow.setMenuBarVisibility(false); 
 
   if (MAIN_WINDOW_VITE_DEV_SERVER_URL) {
     mainWindow.loadURL(MAIN_WINDOW_VITE_DEV_SERVER_URL);
