@@ -14,7 +14,6 @@ export const QuoteProvider = ({ children }) => {
   const [error, setError] = useState(null);
   const isOnline = useOnlineStatus();
 
-  // Ładowanie ulubionych cytatów
   useEffect(() => {
     const loadFavorites = async () => {
       try {
@@ -28,7 +27,21 @@ export const QuoteProvider = ({ children }) => {
     loadFavorites();
   }, []);
 
-  // Ładowanie cytatu dnia
+  useEffect(() => {
+    const preloadQuotes = async () => {
+      try {
+        const shouldRefresh = await QuoteService.shouldRefreshQuotesCache();
+        if (shouldRefresh) {
+          await QuoteService.getAndCacheMultipleQuotes(50); 
+        }
+      } catch (err) {
+        console.error("Error preloading quotes:", err);
+      }
+    };
+
+    preloadQuotes();
+  }, []);
+
   useEffect(() => {
     const loadQuoteOfDay = async () => {
       try {
@@ -46,7 +59,6 @@ export const QuoteProvider = ({ children }) => {
     loadQuoteOfDay();
   }, [isOnline]);
 
-  // Ładowanie losowego cytatu
   useEffect(() => {
     const loadRandomQuote = async () => {
       try {
@@ -114,14 +126,7 @@ export const QuoteProvider = ({ children }) => {
     }
   };
 
-  const isFavorite = async (quoteId) => {
-    try {
-      return await QuoteService.isFavorite(quoteId);
-    } catch (err) {
-      console.error('Error checking if quote is favorite:', err);
-      return favorites.some(quote => quote.id === quoteId);
-    }
-  };
+  const isFavorite = (quoteId) => favorites.some(quote => quote.id === quoteId);
 
   const value = {
     quoteOfDay,
