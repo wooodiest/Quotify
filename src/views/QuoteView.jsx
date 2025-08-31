@@ -9,29 +9,44 @@ const QuoteView = () => {
   const { quoteOfDay, loading, error, fetchQuoteOfDay } = useQuotes();
 
   return (
-    <div className="min-h-screen flex flex-col bg-gray-100">
+    <div className="min-h-screen flex flex-col">
       <Navigation />
       
-      <div className="container mx-auto px-4 py-8 flex-grow">
-        <h1 className="text-3xl font-bold mb-8 text-center">Quote of the Day</h1>
-        
-        {error && (
-          <ErrorMessage message={error} onRetry={fetchQuoteOfDay} />
-        )}
-        
-        <div className="max-w-2xl mx-auto">
-          {loading ? (
-            <div className="h-32 flex items-center justify-center">
-              <LoadingSpinner size="large" />
+      <div className="flex-grow flex items-center justify-center px-4 py-8">
+        <div className="w-full max-w-4xl">
+          <div className="text-center mb-12">
+            <h1 className="text-4xl md:text-5xl font-bold text-white mb-4">
+              Quote of the Day
+            </h1>
+            <p className="text-xl text-white/80 max-w-2xl mx-auto">
+              Discover daily inspiration and wisdom from great minds
+            </p>
+          </div>
+          
+          {error && (
+            <div className="mb-8">
+              <ErrorMessage message={error} onRetry={fetchQuoteOfDay} />
             </div>
-          ) : (
-            <QuoteCard quote={quoteOfDay} />
           )}
+          
+          <div className="max-w-3xl mx-auto">
+            {loading ? (
+              <div className="flex items-center justify-center py-16">
+                <LoadingSpinner size="large" />
+              </div>
+            ) : (
+              <QuoteCard quote={quoteOfDay} />
+            )}
+          </div>
         </div>
       </div>
       
-      <footer className="bg-gray-800 text-white p-4 text-center">
-        <p>© {new Date().getFullYear()} Quotify - Daily Inspiration</p>
+      <footer className="backdrop-blur-md bg-white/10 border-t border-white/20 py-6">
+        <div className="container mx-auto px-6 text-center">
+          <p className="text-white/70">
+            © {new Date().getFullYear()} Quotify - Daily Inspiration
+          </p>
+        </div>
       </footer>
     </div>
   );

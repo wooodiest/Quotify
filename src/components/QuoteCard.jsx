@@ -17,9 +17,12 @@ const QuoteCard = ({ quote, showActions = true }) => {
 
   if (!quote) {
     return (
-      <div className="bg-white p-6 rounded-lg shadow-md animate-pulse">
-        <div className="h-4 bg-gray-200 rounded w-3/4 mb-4"></div>
-        <div className="h-4 bg-gray-200 rounded w-1/2"></div>
+      <div className="card p-8 animate-pulse flex-1">
+        <div className="space-y-4">
+          <div className="h-6 bg-gray-200 rounded w-3/4"></div>
+          <div className="h-6 bg-gray-200 rounded w-1/2"></div>
+          <div className="h-4 bg-gray-200 rounded w-1/3"></div>
+        </div>
       </div>
     );
   }
@@ -35,25 +38,40 @@ const QuoteCard = ({ quote, showActions = true }) => {
   };
 
   return (
-    <div className="bg-white p-6 rounded-lg shadow-md">
-      <blockquote className="italic text-xl mb-4">"{quote.quote}"</blockquote>
-      <p className="text-right font-semibold">— {quote.author}</p>
+    <div className="card p-8 flex flex-col flex-1">
+      <blockquote className="text-center mb-8 flex-1 flex flex-col justify-center">
+        <p className="font-serif text-2xl md:text-3xl text-gray-800 leading-relaxed mb-6">
+          "{quote.quote}"
+        </p>
+        
+        <div className="flex items-center justify-center space-x-2">
+          <div className="w-8 h-0.5 bg-gradient-to-r from-primary-400 to-secondary-400"></div>
+          <p className="font-semibold text-lg text-gray-700">
+            — {quote.author}
+          </p>
+          <div className="w-8 h-0.5 bg-gradient-to-r from-secondary-400 to-primary-400"></div>
+        </div>
+      </blockquote>
       
       {showActions && (
-        <div className="mt-4 flex justify-end">
+        <div className="flex justify-center mt-auto">
           <button
             onClick={handleFavoriteToggle}
-            className={`flex items-center px-4 py-2 rounded-md ${isFav 
-              ? 'bg-red-100 text-red-600 hover:bg-red-200' 
-              : 'bg-gray-100 hover:bg-gray-200'}`}
+            className={`group flex items-center space-x-3 px-6 py-3 rounded-xl transition-all duration-300 transform hover:scale-105 ${
+              isFav 
+                ? 'bg-gradient-to-r from-red-500 to-pink-500 text-white shadow-lg' 
+                : 'bg-white border-2 border-gray-200 text-gray-700 hover:border-primary-300 hover:text-primary-600'
+            }`}
           >
             <svg 
               xmlns="http://www.w3.org/2000/svg" 
-              className="h-5 w-5 mr-1" 
+              className={`h-6 w-6 transition-all duration-300 ${
+                isFav ? 'text-white' : 'text-gray-400 group-hover:text-primary-500'
+              }`}
               viewBox="0 0 20 20" 
               fill={isFav ? 'currentColor' : 'none'}
               stroke="currentColor"
-              strokeWidth={isFav ? '0' : '1.5'}
+              strokeWidth={isFav ? '0' : '2'}
             >
               <path 
                 fillRule="evenodd" 
@@ -61,7 +79,9 @@ const QuoteCard = ({ quote, showActions = true }) => {
                 clipRule="evenodd" 
               />
             </svg>
-            {isFav ? 'Remove from Favorites' : 'Add to Favorites'}
+            <span className="font-medium">
+              {isFav ? 'Remove from Favorites' : 'Add to Favorites'}
+            </span>
           </button>
         </div>
       )}

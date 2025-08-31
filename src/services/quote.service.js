@@ -125,7 +125,7 @@ export const QuoteService = {
       }
 
       if (navigator.onLine) {
-        const quotes = await ApiService.getMultipleQuotes(limit);
+        const quotes = await ApiService.getQuotes(limit);
         await DbService.saveMultipleQuotes(userId, quotes);
 
         await StorageService.setItem('lastQuotesCacheUpdate', {

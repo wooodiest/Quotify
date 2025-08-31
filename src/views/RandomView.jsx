@@ -9,39 +9,65 @@ const RandomView = () => {
   const { randomQuote, loading, error, fetchRandomQuote } = useQuotes();
 
   return (
-    <div className="min-h-screen flex flex-col bg-gray-100">
+    <div className="min-h-screen flex flex-col">
       <Navigation />
       
-      <div className="container mx-auto px-4 py-8 flex-grow">
-        <h1 className="text-3xl font-bold mb-8 text-center">Random Quote</h1>
-        
-        {error && (
-          <ErrorMessage message={error} onRetry={fetchRandomQuote} />
-        )}
-        
-        <div className="max-w-2xl mx-auto">
-          {loading ? (
-            <div className="h-32 flex items-center justify-center">
-              <LoadingSpinner size="large" />
+      <div className="flex-grow flex items-center justify-center px-4 py-8">
+        <div className="w-full max-w-4xl">
+          <div className="text-center mb-12">
+            <h1 className="text-4xl md:text-5xl font-bold text-white mb-4">
+              Random Quote
+            </h1>
+            <p className="text-xl text-white/80 max-w-2xl mx-auto">
+              Discover unexpected wisdom and inspiration
+            </p>
+          </div>
+          
+          {error && (
+            <div className="mb-8">
+              <ErrorMessage message={error} onRetry={fetchRandomQuote} />
             </div>
-          ) : (
-            <QuoteCard quote={randomQuote} />
           )}
-        </div>
-        
-        <div className="mt-8 text-center">
-          <button
-            onClick={fetchRandomQuote}
-            disabled={loading}
-            className={`bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline ${loading ? 'opacity-50 cursor-not-allowed' : ''}`}
-          >
-            {loading ? 'Loading...' : 'Get Another Quote'}
-          </button>
+          
+          <div className="max-w-3xl mx-auto">
+            {loading ? (
+              <div className="flex items-center justify-center py-16">
+                <LoadingSpinner size="large" />
+              </div>
+            ) : (
+              <QuoteCard quote={randomQuote} />
+            )}
+          </div>
+          
+          <div className="text-center mt-12">
+            <button
+              onClick={fetchRandomQuote}
+              disabled={loading}
+              className={`px-8 py-4 rounded-xl font-medium transition-all duration-200 transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-white/50 ${
+                loading 
+                  ? 'bg-white/20 text-white/50 cursor-not-allowed' 
+                  : 'bg-gradient-to-r from-accent-500 to-accent-600 text-white hover:from-accent-600 hover:to-accent-700 shadow-lg'
+              }`}
+            >
+              {loading ? (
+                <div className="flex items-center justify-center space-x-2">
+                  <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
+                  <span>Loading...</span>
+                </div>
+              ) : (
+                'Get Another Quote'
+              )}
+            </button>
+          </div>
         </div>
       </div>
-      
-      <footer className="bg-gray-800 text-white p-4 text-center">
-        <p>© {new Date().getFullYear()} Quotify - Daily Inspiration</p>
+
+      <footer className="backdrop-blur-md bg-white/10 border-t border-white/20 py-6">
+        <div className="container mx-auto px-6 text-center">
+          <p className="text-white/70">
+            © {new Date().getFullYear()} Quotify - Daily Inspiration
+          </p>
+        </div>
       </footer>
     </div>
   );
